@@ -78,9 +78,13 @@
 
     angular
         .module('rlservice', ['ui.bootstrap'])
-    .controller('HomeController', ['$scope', 'ItemsService', 'ManagerService', function ($scope, ItemsService, ManagerService) {
+    .controller('HomeController', ['$scope', 'ItemsService', 'ManagerService', '$http', '$location', function ($scope, ItemsService, ManagerService, $http, $location) {
         var _selected;
         $scope.selected = undefined;
+        $scope.loaded = false;
+        $scope.idclient = $location.search()["idclient"];
+        $scope.password = $location.search()["password"];
+
 
         $scope.Items = undefined;
         $scope.regItem = { DateBuyer: new Date() };
@@ -90,34 +94,102 @@
 
         ItemsService.getItems().then(function (d) {
             $scope.Items = d.data;
-        }, function () {
-            console.log("error occured try again");
+            $scope.loaded = true;
+        }, function (response) {
+            alert(response.data || 'Request failed');
+            $scope.loaded = true;
+            //console.log("error occured try again");
         });
 
+        $scope.clearfunction = function () {
+            $scope.regItem = {};
+            
+        }
   
-        $scope.formatLabel = function (item) {
+        $scope.formatLabel = function (item) {           
             return item ? item.Name : '';
         };
 
+        $scope.searchBarCode = function () {
+            //alert($scope.regItem.BarCode);
+            var data = $.param({
+                barcode: $scope.regItem.BarCode
+            });
+
+            var config = {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+                }
+            };
+
+            $http.post('/rlservice/Home/GetItemsBarCode', data, config)
+            .then(function(response) {
+                //$scope.status = response.status;
+                //$scope.data = response.data;
+                if (Array.isArray(response.data)) {
+                    //$scope.Items = response.data;
+                    $scope.regItem.item = response.data[0];
+                }
+            }, function (response) {
+                alert(response.data || 'Request failed');
+                //$scope.data = response.data || 'Request failed';
+                $scope.status = response.status;
+            });
+        };
+
+        $scope.searchIMEI = function () {
+            //alert($scope.regItem.BarCode);
+            var data = $.param({
+                serial: $scope.regItem.InputIMEI1
+            });
+
+            var config = {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+                }
+            };
+
+            $http.post('/rlservice/Home/GetItemsSerial', data, config)
+            .then(function (response) {
+                //$scope.status = response.status;
+                //$scope.data = response.data;
+                if (Array.isArray(response.data)) {
+                    //$scope.Items = response.data;
+                    //$scope.regItem = angular.copy(response.data[0]);
+                    angular.merge($scope.regItem, response.data[0]);
+                }
+            }, function (response) {
+                alert(response.data || 'Request failed');
+                //$scope.data = response.data || 'Request failed';
+                $scope.status = response.status;
+            });
+        };
+
+
     }])
     .controller('ContactController', ['$scope', 'ManagerService', function ($scope, ManagerService) {
-        $scope.Manager = null;
+        $scope.loaded = false;
+        $scope.Manager = { };
         ManagerService.getManager().then(function (d) {
             $scope.Manager = d.data;
-        }, function () { console.log("error occured try again"); });
+            $scope.loaded = true;
+        }, function () {
+            $scope.loaded = true;
+            console.log("error occured try again");
+        });
     }])
 
     .factory("ItemsService", function ($http) {
         var fact = {};
         fact.getItems = function () {
-            return $http.get('/Home/GetItems');
+            return $http.get('/rlservice/Home/GetItems');
         };
         return fact;
     })
     .factory("ManagerService", function ($http) {
         var fact = {};
         fact.getManager = function () {
-            return $http.get('/Home/GetManager');
+            return $http.get('/rlservice/Home/GetManager');
         };
         return fact;
     })
@@ -139,6 +211,12 @@
 
             return items
         };
+    })
+    .config(function ($locationProvider) {
+        $locationProvider.html5Mode({
+            enabled: true,
+            requireBase: false
+        });
     });
 
 })();

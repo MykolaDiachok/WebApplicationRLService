@@ -13,6 +13,7 @@
     <title>RL service registration</title>
     <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
     <link rel="stylesheet" href="~/styles/main.css" />
+    <link rel="shortcut icon" href="">
 </head>
 <body>
 
@@ -27,13 +28,13 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">RL Service</a>
+                <a class="navbar-brand" href="#">Форма сервиса</a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="#home" class="active" data-toggle="tab" role="tab">Home</a></li>
-                    <li><a href="#about" data-toggle="tab" role="tab">About</a></li>
-                    <li><a href="#contact" data-toggle="tab" role="tab">Contact</a></li>
+                    <li><a href="#home" class="active" data-toggle="tab" role="tab">Заявка</a></li>
+                    @*<li><a href="#about" data-toggle="tab" role="tab">About</a></li>*@
+                    <li><a href="#contact" data-toggle="tab" role="tab">Контакты</a></li>
                     @*<li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
                             <ul class="dropdown-menu">
@@ -55,16 +56,22 @@
     <div class="container" ng-app="rlservice">
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="home">
-                <div ng-controller="HomeController">
+                <div ng-controller="HomeController" ng-cloak>
                     <div class="jumbotron">
                         Уважаемые клиенты, компания Радиолайн предоставляет своим клиентам услуги по логистике товара в авторизированные сервисные центры(АСЦ) для прохождения диагностики и гарантийного сервисного обслуживания.<br /><br />
                         Для вашего удобства и сокращения процедуры приема техники, необходимо оформить заявку на передачу техники в ремонт. Заполнять форму заявки, необходимо максимально корректно и полно, это позволит сократить сроки логистики и ремонта, а так же вероятность повторного обращения.<br /><br />
                         После заполнения заявки ведущий менеджер получит уведомление и ваш заказ будет принят по ускоренной процедуре.
                     </div>
-
-
-
-                    <form class="form-horizontal">
+                    <div ng-hide="loaded">
+                        <div class="panel panel-info" style="border-color:#86c542;">
+                            <div class="panel-heading" style="background-color:#86c542; color:#fff;"> Ожидайте, идет загрузка данных...</div>
+                            <div class="panel-body">
+                                <img src="~/images/ajax-loader.gif" class="img-responsive center-block" alt="Loading...." />
+                            </div>
+                        </div>
+                    </div>
+                    <form class="form-horizontal" ng-show="loaded">
+                        <pre>{{idclient}}:{{password}}</pre>
                         <pre>regItem = {{regItem | json}}</pre>{{start_date}}
 
                         <div class="form-group" ng-class="{ 'has-error' : !regItem.item.Name.length }">
@@ -82,15 +89,16 @@
                                     uib-typeahead="item as item.Name for item in Items | xpTypeaheadFilterJSONObject:$viewValue | limitTo:8" >*@
                                 <input type="text" class="form-control" id="InputName" placeholder="Укажите название номенклатуры, артикул, либо код" ng-model="regItem.item" required
                                        data-typeahead="Name" uib-typeahead="item for item in Items | search:$viewValue | limitTo:8"
-                                       typeahead-template-url="customTemplate.html" typeahead-show-hint="true" typeahead-min-length="3"                                      
+                                       typeahead-template-url="customTemplate.html" typeahead-show-hint="true" typeahead-min-length="3"
                                        typeahead-input-formatter='formatLabel($model)'
                                        typeahead-wait-ms="2"
                                        typeahead-select-on-exact="true"
                                        typeahead-no-results="noResultsItems">
                                 
                                 <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default" aria-label="Remove"  ng-click="clearfunction()">@*<span class="glyphicon glyphicon-remove"></span>*@Очистить</button>
                                     <button type="button" class="btn btn-default" aria-label="Help"><span class="glyphicon glyphicon-question-sign"></span></button>
-                                    <button class="btn btn-default" type="button">Search</button>
+                                    @*<button class="btn btn-default" type="button">Search</button>*@
                                 </div>
 
                             </div>
@@ -98,22 +106,30 @@
                                 <div ng-if="noResultsItems" class="help-block">
                                     Поиск не дал результатов!
                                 </div>
-                                @*<p ng-show="!regItem.item.Name.length" >Наименование номенклатуры должно совпадать с наименованием из базы RL</p>*@                                
+                                @*<p ng-show="!regItem.item.Name.length" >Наименование номенклатуры должно совпадать с наименованием из базы RL</p>*@
                             </div>
                         </div>
+                        <div class="form-group" ng-show="regItem.SalesDoc">
+                            <label class="col-sm-2 control-label">Документ</label>
+                            <div class="col-sm-10 input-group">
+                                <input type="text" class="form-control" id="InputSalesDoc" ng-model="regItem.SalesDoc" ng-disabled="true">
+                            </div>
+                        </div> @*// SalesDoc*@
+
                         <div class="form-group" ng-show="regItem.item.Warranty">
                             <label class="col-sm-2 control-label">Гарантия (месяцев)</label>
                             <div class="col-sm-10 input-group">
-                                <input type="text" class="form-control" id="InputBarCode" ng-model="regItem.item.Warranty" ng-disabled="true">
+                                <input type="text" class="form-control" id="InputWarranty" ng-model="regItem.item.Warranty" ng-disabled="true">
                             </div>
-                        </div>
-                        <div class="form-group" >
+                        </div> @*// Warranty*@
+
+                        <div class="form-group">
                             <label class="col-sm-2 control-label" for="InputBarCode">Штрихкод EAN13</label>
                             <div class="col-sm-10 input-group">
                                 <input type="text" class="form-control" id="InputBarCode" ng-model="regItem.BarCode" ng-disabled="regItem.item.Name.length">
                                 <div class="input-group-btn">
                                     <button type="button" class="btn btn-default" aria-label="Help"><span class="glyphicon glyphicon-question-sign"></span></button>
-                                    <button class="btn btn-default" type="button" ng-disabled="regItem.item.Name.length">Search</button>
+                                    <button class="btn btn-default" type="button" ng-disabled="regItem.item.Name.length || !regItem.BarCode" ng-click="searchBarCode()">Поиск</button>
                                 </div>
                             </div>
                         </div>
@@ -128,13 +144,14 @@
                             </div>
                         </div>
 
-                        <div class="form-group" ng-show="regItem.item.UseSeries">
-                            <label class="col-sm-2 control-label" for="InputIMEI1">IMEI 1</label>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="InputIMEI1" ng-show="regItem.item.UseIMEI">IMEI 1</label>
+                            <label class="col-sm-2 control-label" for="InputIMEI1" ng-show="!regItem.item.UseIMEI">Серийный #</label>
                             <div class="col-sm-10 input-group">
                                 <input type="text" class="form-control" id="InputIMEI1" ng-model="regItem.InputIMEI1">
                                 <div class="input-group-btn">
                                     <button type="button" class="btn btn-default" aria-label="Help"><span class="glyphicon glyphicon-question-sign"></span></button>
-                                    <button class="btn btn-default" type="button">Search</button>
+                                    <button class="btn btn-default" type="button" ng-disabled="!regItem.InputIMEI1" ng-click="searchIMEI()">Поиск</button>
                                 </div>
                             </div>
                         </div>
@@ -150,7 +167,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" ng-show="regItem.item.UseIMEI">
                             <label class="col-sm-2 control-label" for="InputSearialNumber">Серийный #</label>
                             <div class="col-sm-10 input-group">
                                 <input type="text" class="form-control" id="InputSearialNumber" ng-model="regItem.SearialNumber">
@@ -229,7 +246,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-default">Submit</button>
+                        <button type="submit" class="btn btn-default">Отправить заявку</button>
 
                     </form>
 
@@ -237,25 +254,33 @@
             </div>
             <div role="tabpanel" class="tab-pane" id="about">About</div>
             <div role="tabpanel" class="tab-pane" id="contact">
-                <div ng-controller="ContactController">
-                    <div class="panel panel-primary">
+                <div ng-controller="ContactController" ng-cloak>
+                    <div class="panel panel-success">
                         <div class="panel-heading">
-                            Менеджер: {{Manager|json}}
+                            Менеджер: {{Manager[0].Name}}
                         </div>
-                        <div class="panel-body">
-                            Panel footer
-                        </div>
+
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                e-mail: <a href="mailto:{{Manager[0].email}}?Subject=Система%20сервиса">{{Manager[0].email}}</a>
+                            </li>
+                            <li class="list-group-item">
+                                Телефон: {{Manager[0].mobile}}
+                            </li>
+                        </ul>
+
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="footer">
-        <div class="container">
-            <p class="text-muted">RadioLine © @DateTime.Now.Year</p>
-        </div>
-    </footer>
+    @*<footer class="footer">
+            <div class="container">
+                <p class="text-muted">RadioLine © @DateTime.Now.Year</p>
+            </div>
+        </footer>*@
 
     <script src="~/Scripts/jquery-3.1.1.min.js" type="text/javascript"></script>
     <script src="~/Scripts/bootstrap.min.js" type="text/javascript"></script>
