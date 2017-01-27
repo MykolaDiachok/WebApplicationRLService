@@ -21,12 +21,12 @@
 
                     var text = props.toLowerCase();
 
-                    for (var key in item) {                        
-                            var itemLoverCase = item.toLowerCase();
-                            var substr = itemLoverCase.substr(0, text.length);
-                            if (substr === text) {
-                                out.push(item);
-                            }                        
+                    for (var key in item) {
+                        var itemLoverCase = item.toLowerCase();
+                        var substr = itemLoverCase.substr(0, text.length);
+                        if (substr === text) {
+                            out.push(item);
+                        }
                     }
 
                 });
@@ -41,7 +41,7 @@
     }
 
     function xpTypeaheadFilterJSONObject() {
-        return function (items, props) {            
+        return function (items, props) {
             var out = [];
 
             if (angular.isArray(items)) {
@@ -52,10 +52,10 @@
                     //var searchTerm = text.split(' ');
 
                     for (var key in item) {
-                        if (typeof item[key] == 'string') {                            
+                        if (typeof item[key] == 'string') {
                             var itemLoverCase = item[key].toLowerCase();
                             var searchTerm = itemLoverCase.substr(0, text.length).split(' ');
-                           
+
                             //if (substr === text) {
                             if (FullTextContains(text, searchTerm) == true) {
                                 console.log(searchTerm);
@@ -77,12 +77,12 @@
     }
 
     angular
-        .module('rlservice', ['ui.bootstrap'])
-    .controller('HomeController', ['$scope', 'ItemsService', 'ManagerService', '$http', '$location', function ($scope, ItemsService, ManagerService, $http, $location) {
+        .module('rlservice', ['ui.bootstrap', "ui.bootstrap.modal"])
+    .controller('HomeController', ['$scope', 'ItemsService', 'ActionItemsService', '$http', '$location', function ($scope, ItemsService, ActionItemsService, $http, $location) {
         var _selected;
         $scope.selected = undefined;
         $scope.loaded = false;
-        $scope.idclient = $location.search()["idclient"];
+        $scope.login = $location.search()["login"];
         $scope.password = $location.search()["password"];
 
 
@@ -103,10 +103,10 @@
 
         $scope.clearfunction = function () {
             $scope.regItem = {};
-            
+
         }
-  
-        $scope.formatLabel = function (item) {           
+
+        $scope.formatLabel = function (item) {
             return item ? item.Name : '';
         };
 
@@ -123,7 +123,7 @@
             };
 
             $http.post('/rlservice/Home/GetItemsBarCode', data, config)
-            .then(function(response) {
+            .then(function (response) {
                 //$scope.status = response.status;
                 //$scope.data = response.data;
                 if (Array.isArray(response.data)) {
@@ -164,12 +164,43 @@
                 $scope.status = response.status;
             });
         };
+        $scope.ActionItems = [];
+
+        ActionItemsService.getActionItems().then(function (d) {
+            $scope.ActionItems = d.data;
+        }, function () {
+            console.log("getActionItems error occured try again");
+        });
+
+
+        $scope.SendData = function () {
+            // use $.param jQuery function to serialize data from JSON 
+
+            var config = {
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                }
+            };
+
+            $http.post('/rlservice/Home/postData', $scope.regItem, config)
+            .success(function (data, status, headers, config) {
+                $scope.PostDataResponse = data;
+            })
+            .error(function (data, status, header, config) {
+                $scope.ResponseDetails = "Data: " + data +
+                    "<hr />status: " + status +
+                    "<hr />headers: " + header +
+                    "<hr />config: " + config;
+            });
+        };
+
+
 
 
     }])
     .controller('ContactController', ['$scope', 'ManagerService', function ($scope, ManagerService) {
         $scope.loaded = false;
-        $scope.Manager = { };
+        $scope.Manager = {};
         ManagerService.getManager().then(function (d) {
             $scope.Manager = d.data;
             $scope.loaded = true;
@@ -190,6 +221,13 @@
         var fact = {};
         fact.getManager = function () {
             return $http.get('/rlservice/Home/GetManager');
+        };
+        return fact;
+    })
+    .factory("ActionItemsService", function ($http) {
+        var fact = {};
+        fact.getActionItems = function () {
+            return $http.get('/rlservice/Home/GetActionItems');
         };
         return fact;
     })

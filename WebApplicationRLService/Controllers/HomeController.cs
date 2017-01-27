@@ -10,6 +10,7 @@ using System.Web.Helpers;
 using Newtonsoft.Json.Linq;
 using System.Web.Caching;
 using WebApplicationRLService.Models;
+using System.IO;
 
 namespace WebApplicationRLService.Controllers
 {
@@ -56,6 +57,26 @@ namespace WebApplicationRLService.Controllers
             //}
 
             return View();
+        }
+
+        [OutputCache(CacheProfile = "CacheProfile")]
+        public ContentResult GetActionItems()
+        {
+            using (WebClient webclient = new WebClient())
+            {
+                string uri = server + "/" + database + "/hs/rlservice/ActionItems";
+
+                webclient.Encoding = Encoding.UTF8;
+                webclient.UseDefaultCredentials = false;
+                webclient.Credentials = GetCredentialCache(uri);
+                webclient.Headers.Add("idclient", HttpUtility.ParseQueryString(Request.UrlReferrer.Query)["login"]);
+                webclient.Headers.Add("password", HttpUtility.ParseQueryString(Request.UrlReferrer.Query)["password"]);                
+
+                var jsonstring = webclient.DownloadString(uri);
+
+                //Cache.Insert("GetItemsListsAll", jsonstring);
+                return new ContentResult { Content = jsonstring, ContentType = "application/json" }; ;
+            }
         }
 
 
@@ -145,6 +166,38 @@ namespace WebApplicationRLService.Controllers
                 return new ContentResult { Content = jsonstring, ContentType = "application/json" }; ;
             }
         }
+
+        [HttpPost]
+        public ContentResult postData(string json)
+        {
+            using (WebClient webclient = new WebClient())
+            {
+                JObject o = new JObject();
+                o["result"] = false;
+                o["info"] = "Ошибка потока json";
+                var jsonstring = o.ToString();
+
+                var resolveRequest = HttpContext.Request;
+                resolveRequest.InputStream.Seek(0, SeekOrigin.Begin);
+                string jsonString = new StreamReader(resolveRequest.InputStream).ReadToEnd();
+                if (jsonString != null)
+                {
+                    var uri = server + "/" + database + "/hs/rlservice/SaveOrder";
+
+                    webclient.Encoding = Encoding.UTF8;
+                    webclient.UseDefaultCredentials = true;
+                    webclient.Credentials = GetCredentialCache(uri);
+                    webclient.Headers.Add("idclient", HttpUtility.ParseQueryString(Request.UrlReferrer.Query)["login"]);
+                    webclient.Headers.Add("password", HttpUtility.ParseQueryString(Request.UrlReferrer.Query)["password"]);
+                    jsonstring = webclient.UploadString(uri, jsonString);
+                }
+                
+
+                //Cache.Insert("GetItemsListsAll", jsonstring);
+                return new ContentResult { Content = jsonstring, ContentType = "application/json" }; ;
+            }
+        }
+
 
     }
 }

@@ -62,6 +62,9 @@
                         Для вашего удобства и сокращения процедуры приема техники, необходимо оформить заявку на передачу техники в ремонт. Заполнять форму заявки, необходимо максимально корректно и полно, это позволит сократить сроки логистики и ремонта, а так же вероятность повторного обращения.<br /><br />
                         После заполнения заявки ведущий менеджер получит уведомление и ваш заказ будет принят по ускоренной процедуре.
                     </div>
+
+
+
                     <div ng-hide="loaded">
                         <div class="panel panel-info" style="border-color:#86c542;">
                             <div class="panel-heading" style="background-color:#86c542; color:#fff;"> Ожидайте, идет загрузка данных...</div>
@@ -70,8 +73,8 @@
                             </div>
                         </div>
                     </div>
-                    <form class="form-horizontal" ng-show="loaded">
-                        <pre>{{idclient}}:{{password}}</pre>
+                    <form class="form-horizontal" ng-show="loaded" ng-submit="SendData()">
+                        <pre>{{login}}:{{password}}</pre>
                         <pre>regItem = {{regItem | json}}</pre>{{start_date}}
 
                         <div class="form-group" ng-class="{ 'has-error' : !regItem.item.Name.length }">
@@ -87,7 +90,7 @@
                                 </script>
                                 @*<input type="text" class="form-control" id="InputName" placeholder="Укажите название номенклатуры, артикул, либо код" ng-model="regItem.item" required
                                     uib-typeahead="item as item.Name for item in Items | xpTypeaheadFilterJSONObject:$viewValue | limitTo:8" >*@
-                                <input type="text" class="form-control" id="InputName" placeholder="Укажите название номенклатуры, артикул, либо код" ng-model="regItem.item" required
+                                <input type="text" class="form-control" id="InputName" placeholder="Укажите название номенклатуры, артикул, либо код" ng-model="regItem.item"
                                        data-typeahead="Name" uib-typeahead="item for item in Items | search:$viewValue | limitTo:8"
                                        typeahead-template-url="customTemplate.html" typeahead-show-hint="true" typeahead-min-length="3"
                                        typeahead-input-formatter='formatLabel($model)'
@@ -208,9 +211,12 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="col-sm-2 control-label" for="InputAction">Действие с переданной номенклатурой</label>
+                            <label class="col-sm-2 control-label" for="InputAction">Действие с товаром</label>
                             <div class="col-sm-10  col-xs-12 input-group">
-                                <textarea class="form-control" rows="4" id="InputAction" placeholder="" ng-model="regItem.Action"></textarea>
+                                <select class="form-control" id="InputAction"
+                                        ng-options="option.name for option in ActionItems track by option.id"
+                                        ng-model="regItem.Action"></select>
+                                @*<textarea class="form-control" rows="4" id="InputAction" placeholder="" ng-model="regItem.Action"></textarea>*@
                                 @*<div class="input-group-btn">
                                         <button type="button" class="btn btn-default" aria-label="Help"><span class="glyphicon glyphicon-question-sign"></span></button>
                                     </div>*@
@@ -228,7 +234,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="col-sm-2 control-label" for="InputDateBuyer">Дата получения ТМЦ от покупателя</label>
+                            <label class="col-sm-2 control-label" for="InputDateBuyer">Дата получения товара от покупателя</label>
                             <div class="col-sm-10 input-group">
                                 <input type="date" class="form-control" id="InputDateBuyer" ng-model="regItem.DateBuyer">
                                 <div class="input-group-btn">
@@ -255,8 +261,8 @@
             <div role="tabpanel" class="tab-pane" id="about">About</div>
             <div role="tabpanel" class="tab-pane" id="contact">
                 <div ng-controller="ContactController" ng-cloak>
-                    <div class="panel panel-success">
-                        <div class="panel-heading">
+                    <div class="panel panel-success" style="border-color:#86c542;">
+                        <div class="panel-heading"  style="background-color:#86c542; color:#fff;">
                             Менеджер: {{Manager[0].Name}}
                         </div>
 
@@ -285,7 +291,7 @@
     <script src="~/Scripts/jquery-3.1.1.min.js" type="text/javascript"></script>
     <script src="~/Scripts/bootstrap.min.js" type="text/javascript"></script>
     <script src="~/Scripts/angular.min.js" type="text/javascript"></script>
-    <script src="~/Scripts/angular-ui/ui-bootstrap-tpls.min.js" type="text/javascript"></script>
+    <script src="~/Scripts/angular-ui/ui-bootstrap-tpls.min.js" type="text/javascript"></script>    
     <script src="~/Scripts/app.js" type="text/javascript"></script>
 </body>
 </html>
