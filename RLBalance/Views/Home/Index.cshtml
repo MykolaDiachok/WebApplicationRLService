@@ -16,8 +16,34 @@
     <link rel="shortcut icon" href="">
 </head>
 <body>
-    <h2>Balance</h2>
+    <div class="container-fluid" ng-app="rlbalance">
+        <div ng-controller="BalanceController" ng-cloak>
+            @*<h2>Balance</h2>*@
+            @*{{Balance | json}}*@
 
+            <table class="table table-hover">
+                <caption>Ваш баланс:</caption>
+                <tr>
+                    <th>Валюта</th>
+                    <th>Общий долг</th>                    
+                    <th>Дней просрочки</th>
+                    <th>Просрочка</th>
+                    <th>К оплате на сегодня</th>
+                    <th>К оплате на {{dataTomorrow  | date:'dd.MM.yyyy'}}</th>
+                    <th>К оплате на {{dataAfterTomorrow  | date:'dd.MM.yyyy'}}</th>
+                </tr>
+                <tr ng-repeat="bal in Balance">
+                    <td>{{ bal.currency }}</td>
+                    <td>{{ bal.Total }}</td>
+                    <td>{{ bal.DaysOverdue }}</td>
+                    <td>{{ bal.Overdue }}</td>
+                    <td>{{ bal.PayNow }}</td>
+                    <td>{{ bal.PayTomorrow }}</td>
+                    <td>{{ bal.PayAfterTomorrow }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
     <script src="~/Scripts/jquery-3.1.1.min.js" type="text/javascript"></script>
     <script src="~/Scripts/bootstrap.min.js" type="text/javascript"></script>

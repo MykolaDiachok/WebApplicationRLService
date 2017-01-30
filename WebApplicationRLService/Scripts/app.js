@@ -77,7 +77,7 @@
     }
 
     angular
-        .module('rlservice', ['ui.bootstrap', "ui.bootstrap.modal"])
+        .module('rlservice', ['ui.bootstrap'])
     .controller('HomeController', ['$scope', 'ItemsService', 'ActionItemsService', '$http', '$location', function ($scope, ItemsService, ActionItemsService, $http, $location) {
         var _selected;
         $scope.selected = undefined;

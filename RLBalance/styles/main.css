@@ -48,3 +48,6 @@ code {
     -moz-border-radius: 4px;
     border-radius: 4px;
 }*/
+th {
+    font-size: 12px;
+}

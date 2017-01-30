@@ -937,7 +937,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>55440</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:55440</IISUrl>
+          <IISUrl>http://localhost:55440/rlservice</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
